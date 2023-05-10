@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Collection</title>
+</head>
+<body>
+  <h1>Book Collection</h1>
+
+  <form id="add-book-form">
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" required><br>
+
+    <label for="author">Author:</label>
+    <input type="text" id="author" name="author" required><br>
+
+    <label for="publishedDate">Published Date:</label>
+    <input type="date" id="publishedDate" name="publishedDate"><br>
+
+    <button type="submit">Add Book</button>
+  </form>
+
+  <ul id="book-list"></ul>
+
+  <script>
+    const form = document.getElementById('add-book-form');
+    const bookList = document.getElementById('book-list');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const title = formData.get('title');
+      const author = formData.get('author');
+      const publishedDate = formData.get('publishedDate');
+
+      const response = await fetch('/books', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({title, author, publishedDate})
+      });
+
+      const book = await response.json();
+      const li = document.createElement('li');
+      li.textContent = `${book.title} by ${book.author}`;
+      
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Delete';
+      li.appendChild(deleteButton);
+
+      deleteButton.addEventListener('click', async () => {
+        const response = await fetch(`/books/${book.id}`, {method: 'DELETE'});
+        const result = await response.json();
+        if (result.message === 'Book successfully deleted') {
+          li.remove();
+        }
+      });
+
+      bookList.appendChild(li);
+
+      form.reset();
+    });
+
+    async function fetchBooks() {
+      const response = await fetch('/books');
+      const books = await response.json();
+
+      books.forEach(book => {
+        const li = document.createElement('li');
+        li.textContent = `${book.title} by ${book.author}`;
+        
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        li.appendChild(deleteButton);
+
+        deleteButton.addEventListener('click', async () => {
+          const response = await fetch(`/books/${book.id}`, {method: 'DELETE'});
+          const result = await response.json();
+          if (result.message === 'Book successfully deleted') {
+            li.remove();
+          }
+        });
+
+        bookList.appendChild(li);
+      });
+    }
+
+    fetchBooks();
+  </script>
+</body>
+</html>
