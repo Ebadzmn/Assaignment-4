@@ -42,7 +42,7 @@
 
       const book = await response.json();
       const li = document.createElement('li');
-      li.textContent = `${book.title} by ${book.author}`;
+      li.textContent = `${book.title} by ${book.author} at ${book.publishedDate}`;
       
       const deleteButton = document.createElement('button');
       deleteButton.textContent = 'Delete';
